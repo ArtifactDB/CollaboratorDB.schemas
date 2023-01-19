@@ -1,0 +1,11 @@
+Package: CollaboratorDB.schemas
+Title: Schemas for the CollaboratorDB Framework
+Version: 0.98.0
+License: MIT + file LICENSE
+Date: 2023-01-19
+Description:
+    Stores all schemas required by the CollaboratorDB package.
+    We use a separate package instead of storing the schemas in CollaboratorDB itself,
+    to avoid conflating management of the schemas with code maintenence.
+Authors@R: person("Aaron", "Lun", role=c("cre", "aut"), email="infinite.monkeys.with.keyboards@gmail.com")
+RoxygenNote: 7.2.1

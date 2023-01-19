@@ -1,0 +1,389 @@
+{
+    "$id": "hdf5_sparse_matrix/v1.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "_attributes": {
+        "format": "application/x-hdf5",
+        "restore": {
+            "R": "alabaster.matrix::loadArray"
+        }
+    },
+    "additionalProperties": false,
+    "allOf": [
+        {
+            "if": {
+                "not": {
+                    "properties": {
+                        "is_child": {
+                            "const": true
+                        }
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "title",
+                    "description",
+                    "authors",
+                    "species",
+                    "genome",
+                    "origin",
+                    "terms"
+                ]
+            }
+        }
+    ],
+    "description": "Sparse matrix, saved in compressed sparse format inside a group of a HDF5 file. The HDF5 group should contain a `data` subgroup, which should in turn contain the typical contents of the compressed sparse matrix, i.e., `indices`, `indptr` and `data`. Specifically, `data` should be a 1-dimensional integer or numeric dataset contains the values of the non-zero elements; `indices` should be a 1-dimensional integer dataset containing the 0-based row/column index for each non-zero element in `data`; and `indptr` should be a 1-dimensional integer dataset of length equal to the number of columns/rows plus 1, containing pointers to the start and end of each column/row. The exact interpretation depends on the format specified in `format`.\n\nDimnames may also be saved inside the same HDF5 file, as string datasets in another group. In such cases, the `hdf5_sparse_matrix.dimnames` property should be present and contain the name of that group.\n\nIf `data` is an integer dataset, missing values are represented by -2147483648.\n\nDerived from `array/v1.json`: some kind of multi-dimensional array, where we store metadata about the dimensions and type of data. The exact implementation of the array is left to concrete subclasses.",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use.",
+            "type": "string"
+        },
+        "array": {
+            "additionalProperties": false,
+            "properties": {
+                "dimensions": {
+                    "description": "Dimensions of an n-dimensional array.",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                },
+                "type": {
+                    "description": "Type of data stored in this array.",
+                    "enum": [
+                        "boolean",
+                        "number",
+                        "integer",
+                        "string",
+                        "other"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "dimensions"
+            ],
+            "type": "object"
+        },
+        "authors": {
+            "items": {
+                "description": "Names of the authors in terms of their GitHub logins.",
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "description": {
+            "description": "Description of the resource.",
+            "type": "string"
+        },
+        "genome": {
+            "description": "UCSC, Ensembl or other genome builds involved in generating this resource.",
+            "items": {
+                "properties": {
+                    "id": {
+                        "description": "Identifier for this genome build.",
+                        "examples": [
+                            "mm10",
+                            "NCBIm37"
+                        ],
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Source of the genome build identifier.",
+                        "enum": [
+                            "Ensembl",
+                            "UCSC",
+                            "Wormbase",
+                            "Flybase"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "source"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "hdf5_sparse_matrix": {
+            "additionalProperties": false,
+            "properties": {
+                "dimnames": {
+                    "description": "Name of the group containing the dimnames. This group should contain zero or one string datasets for each dimension. The name of each string dataset is based on its dimension - `\"0\"` for rows, `\"1\"` for columns - and should have length equal to the extent of that dimension. If this property is not present, it can be assumed that no dimnames are available. Each dataset should not contain any missing values, so each string can be interpreted as-is.",
+                    "type": "string"
+                },
+                "format": {
+                    "description": "Format of the sparse matrix. For `csc_matrix` and `csr_matrix`, the attributes of the sparse matrix's HDF5 group should contain at least `encoding-type`, a string set to `csc_matrix` or `csr_matrix`; and `shape`, an integer vector of length 2 containing the dimensions. For `tenx_matrix` (implicitly in compressed sparse column format), the group should contain a `shape` dataset, an integer vector of length 2 containing the dimensions.",
+                    "enum": [
+                        "csc_matrix",
+                        "csr_matrix",
+                        "tenx_matrix"
+                    ],
+                    "type": "string"
+                },
+                "group": {
+                    "description": "Name of the group inside the HDF5 file that contains the sparse matrix's data.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "format",
+                "group"
+            ],
+            "type": "object"
+        },
+        "is_child": {
+            "default": false,
+            "description": "Is this a child document, only to be interpreted in the context of the parent document from which it is linked? This may have implications for search and metadata requirements.",
+            "type": "boolean"
+        },
+        "md5sum": {
+            "description": "MD5 checksum for the file.",
+            "type": "string"
+        },
+        "origin": {
+            "description": "Origins of this resource.",
+            "items": {
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "PubMed"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "GEO"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^GSE[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "ArrayExpress"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^E-MTAB-[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "DOI"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^[0-9a-zA-Z\\._-]+/[0-9a-zA-Z\\._-]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "URI"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^(http|ftp|https|s3|sftp)://",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Identifier for the resource in the specified `type`.",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Source database or repository.",
+                        "enum": [
+                            "PubMed",
+                            "GEO",
+                            "ArrayExpress",
+                            "DOI",
+                            "URI"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "path": {
+            "description": "Path to the file in the project directory.",
+            "type": "string"
+        },
+        "species": {
+            "items": {
+                "description": "NCBI taxonomy IDs of the species involved in this resource.",
+                "type": "integer"
+            },
+            "type": "array"
+        },
+        "terms": {
+            "description": "Terms from a controlled vocabulary, used to annotate this resource in a machine-readable manner.",
+            "items": {
+                "additionalProperties": false,
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Experimental Factor Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^EFO:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Human Disease Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^DOID:[0-9]+$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Cell Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^CL:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "UBERON"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "source": {
+                                    "const": "^UBERON:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Identifier for the term.",
+                        "examples": [
+                            "EFO:0008913",
+                            "DOID:13250",
+                            "CL:0000097",
+                            "UBERON:0005870"
+                        ],
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Name of the vocabulary or ontology that is the source for this term.",
+                        "enum": [
+                            "Experimental Factor Ontology",
+                            "Human Disease Ontology",
+                            "Cell Ontology",
+                            "UBERON"
+                        ],
+                        "type": "string"
+                    },
+                    "version": {
+                        "description": "Version of the vocabulary.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "source",
+                    "version"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "title": {
+            "description": "Title of the resource.",
+            "type": "string"
+        }
+    },
+    "required": [
+        "$schema",
+        "array",
+        "hdf5_sparse_matrix",
+        "md5sum",
+        "path"
+    ],
+    "title": "HDF5 sparse matrix",
+    "type": "object"
+}

@@ -1,0 +1,483 @@
+{
+    "$id": "dataset/v1.json",
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "_attributes": {
+        "metadata_only": true,
+        "restore": {
+            "R": "alabaster.mae::loadMultiAssayExperiment"
+        }
+    },
+    "additionalProperties": false,
+    "allOf": [
+        {
+            "if": {
+                "not": {
+                    "properties": {
+                        "is_child": {
+                            "const": true
+                        }
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "title",
+                    "description",
+                    "authors",
+                    "species",
+                    "genome",
+                    "origin",
+                    "terms"
+                ]
+            }
+        }
+    ],
+    "description": "A dataset containing multiple summarized experiments, possibly with non-trivial relationships between the columns of different experiments. This is derived from Bioconductor's [MultiAssayExperiment](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html) class. This document contains pointers to the various components including the sample data, sample mapping and experiments.",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use.",
+            "type": "string"
+        },
+        "authors": {
+            "items": {
+                "description": "Names of the authors in terms of their GitHub logins.",
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "dataset": {
+            "additionalProperties": false,
+            "properties": {
+                "experiments": {
+                    "description": "Array of pointers to the summarized experiments. Each experiment should contain column names that unique within that experiment.",
+                    "items": {
+                        "properties": {
+                            "name": {
+                                "description": "Name of the experiment.",
+                                "type": "string"
+                            },
+                            "resource": {
+                                "_children": {
+                                    "contains": [
+                                        "summarized_experiment"
+                                    ]
+                                },
+                                "properties": {
+                                    "path": {
+                                        "description": "Relative path of the resource from the root of the project directory.",
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "description": "Type of file. Local files should be present in the same project directory.",
+                                        "enum": [
+                                            "local"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "type",
+                                    "path"
+                                ],
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "resource"
+                        ],
+                        "type": "object"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                },
+                "other_data": {
+                    "description": "Pointer to additional metadata for this object, typically stored as a list (via the `basic_list` schema).",
+                    "properties": {
+                        "resource": {
+                            "_children": {
+                                "contains": [
+                                    "basic_list"
+                                ]
+                            },
+                            "properties": {
+                                "path": {
+                                    "description": "Relative path of the resource from the root of the project directory.",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of file. Local files should be present in the same project directory.",
+                                    "enum": [
+                                        "local"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "path"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "resource"
+                    ],
+                    "type": "object"
+                },
+                "sample_data": {
+                    "description": "Pointer to the sample data. This should be a data frame with one row per sample in the dataset, where each column contains sample annotations. Row names should be present and unique.",
+                    "properties": {
+                        "resource": {
+                            "_children": {
+                                "contains": [
+                                    "data_frame"
+                                ]
+                            },
+                            "properties": {
+                                "path": {
+                                    "description": "Relative path of the resource from the root of the project directory.",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of file. Local files should be present in the same project directory.",
+                                    "enum": [
+                                        "local"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "path"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "resource"
+                    ],
+                    "type": "object"
+                },
+                "sample_mapping": {
+                    "description": "Pointer to the sample mappings. This defines the relationships between columns of the summarized experiments and the samples in the dataset. The data frame should always contain three string columns:\n\n- `sample`, the sample name.\n- 'experiment', the name of the experiment.\n- 'column', the name of the column in that experiment.\n\nEach row defines a single relationship between a sample and an experiment's column.",
+                    "properties": {
+                        "resource": {
+                            "_children": {
+                                "contains": [
+                                    "csv_data_frame"
+                                ]
+                            },
+                            "properties": {
+                                "path": {
+                                    "description": "Relative path of the resource from the root of the project directory.",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of file. Local files should be present in the same project directory.",
+                                    "enum": [
+                                        "local"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "path"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "resource"
+                    ],
+                    "type": "object"
+                }
+            },
+            "required": [
+                "experiments",
+                "sample_data",
+                "sample_mapping"
+            ],
+            "type": "object"
+        },
+        "description": {
+            "description": "Description of the resource.",
+            "type": "string"
+        },
+        "genome": {
+            "description": "UCSC, Ensembl or other genome builds involved in generating this resource.",
+            "items": {
+                "properties": {
+                    "id": {
+                        "description": "Identifier for this genome build.",
+                        "examples": [
+                            "mm10",
+                            "NCBIm37"
+                        ],
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Source of the genome build identifier.",
+                        "enum": [
+                            "Ensembl",
+                            "UCSC",
+                            "Wormbase",
+                            "Flybase"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "source"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "is_child": {
+            "default": false,
+            "description": "Is this a child document, only to be interpreted in the context of the parent document from which it is linked? This may have implications for search and metadata requirements.",
+            "type": "boolean"
+        },
+        "origin": {
+            "description": "Origins of this resource.",
+            "items": {
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "PubMed"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "GEO"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^GSE[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "ArrayExpress"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^E-MTAB-[0-9]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "DOI"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^[0-9a-zA-Z\\._-]+/[0-9a-zA-Z\\._-]+$",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "URI"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^(http|ftp|https|s3|sftp)://",
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Identifier for the resource in the specified `type`.",
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Source database or repository.",
+                        "enum": [
+                            "PubMed",
+                            "GEO",
+                            "ArrayExpress",
+                            "DOI",
+                            "URI"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "path": {
+            "description": "Path to the file in the project directory.",
+            "type": "string"
+        },
+        "species": {
+            "items": {
+                "description": "NCBI taxonomy IDs of the species involved in this resource.",
+                "type": "integer"
+            },
+            "type": "array"
+        },
+        "terms": {
+            "description": "Terms from a controlled vocabulary, used to annotate this resource in a machine-readable manner.",
+            "items": {
+                "additionalProperties": false,
+                "allOf": [
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Experimental Factor Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^EFO:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Human Disease Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^DOID:[0-9]+$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "Cell Ontology"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "id": {
+                                    "pattern": "^CL:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {
+                                "source": {
+                                    "const": "UBERON"
+                                }
+                            }
+                        },
+                        "then": {
+                            "properties": {
+                                "source": {
+                                    "const": "^UBERON:[0-9]{7}$"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Identifier for the term.",
+                        "examples": [
+                            "EFO:0008913",
+                            "DOID:13250",
+                            "CL:0000097",
+                            "UBERON:0005870"
+                        ],
+                        "type": "string"
+                    },
+                    "source": {
+                        "description": "Name of the vocabulary or ontology that is the source for this term.",
+                        "enum": [
+                            "Experimental Factor Ontology",
+                            "Human Disease Ontology",
+                            "Cell Ontology",
+                            "UBERON"
+                        ],
+                        "type": "string"
+                    },
+                    "version": {
+                        "description": "Version of the vocabulary.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "source",
+                    "version"
+                ],
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "title": {
+            "description": "Title of the resource.",
+            "type": "string"
+        }
+    },
+    "required": [
+        "$schema",
+        "dataset",
+        "path"
+    ],
+    "title": "Dataset",
+    "type": "object"
+}
