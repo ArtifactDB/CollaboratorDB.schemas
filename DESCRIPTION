@@ -8,4 +8,4 @@ Description:
     We use a separate package instead of storing the schemas in CollaboratorDB itself,
     to avoid conflating management of the schemas with code maintenence.
 Authors@R: person("Aaron", "Lun", role=c("cre", "aut"), email="infinite.monkeys.with.keyboards@gmail.com")
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
