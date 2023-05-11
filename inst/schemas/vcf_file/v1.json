@@ -3,7 +3,7 @@
     "$schema": "http://json-schema.org/draft-07/schema",
     "_attributes": {
         "restore": {
-            "R": "alabaster.vcf::loadVCFHeader"
+            "R": "alabaster.files::loadVcfWrapper"
         }
     },
     "additionalProperties": false,
@@ -340,9 +340,22 @@
         },
         "vcf_file": {
             "additionalProperties": false,
+            "allOf": [
+                {
+                    "if": {
+                        "required": [
+                            "index"
+                        ]
+                    },
+                    "then": {
+                        "compression": {
+                            "const": "bgzip"
+                        }
+                    }
+                }
+            ],
             "properties": {
                 "compression": {
-                    "default": "none",
                     "description": "The compression format.",
                     "enum": [
                         "none",
@@ -355,10 +368,79 @@
                 "header_only": {
                     "description": "Whether this file only contains the VCF headers, but no data. This is set to `true` when another object contains the VCF data, e.g., in a `vcf_experiment`.",
                     "type": "boolean"
+                },
+                "index": {
+                    "description": "Tabix file to index the variants. If present, the variants in this VCF file are sorted by their genomic position, and `compression` must be set to \"bgzip\".",
+                    "properties": {
+                        "resource": {
+                            "_children": {
+                                "contains": [
+                                    "tabix_index_file"
+                                ]
+                            },
+                            "properties": {
+                                "path": {
+                                    "description": "Relative path of the resource from the root of the project directory.",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of file. Local files should be present in the same project directory.",
+                                    "enum": [
+                                        "local"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "path"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "resource"
+                    ],
+                    "type": "object"
+                },
+                "other_data": {
+                    "description": "Location of additional metadata for this file, typically stored as a list (via the `simple_list` schema). Ommitted if no other metadata is provided.",
+                    "properties": {
+                        "resource": {
+                            "_children": {
+                                "contains": [
+                                    "simple_list"
+                                ]
+                            },
+                            "properties": {
+                                "path": {
+                                    "description": "Relative path of the resource from the root of the project directory.",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Type of file. Local files should be present in the same project directory.",
+                                    "enum": [
+                                        "local"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "path"
+                            ],
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "resource"
+                    ],
+                    "type": "object"
                 }
             },
             "required": [
-                "header_only"
+                "header_only",
+                "compression"
             ],
             "type": "object"
         }
